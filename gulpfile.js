@@ -91,7 +91,7 @@ gulp.task('build', function() {
 // Run the test... TODO: split these out to individual components.
 gulp.task('jshint', function () {
   gulp.src([
-      '*.js', 'lib/**/*.js', 'test/**/*.js',
+      '*.js', 'src/**/*.js', 'test/**/*.js',
       '!test/coverage/**/*.js', '!test/integration/migrate/migrations/*.js'
     ])
     .pipe(jshint())

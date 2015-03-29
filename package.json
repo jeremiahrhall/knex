@@ -57,7 +57,7 @@
     "coveralls": "~2.11.1"
   },
   "scripts": {
-    "build": "gulp build",
+    "build": "rm -rf ./lib && babel src --watch --loose=all --copy-files --remove-comments --out-dir lib",
     "plaintest": "mocha --check-leaks -t 5000 -b -R spec test/index.js",
     "test": "npm run jshint && istanbul --config=test/.istanbul.yml cover _mocha -- --check-leaks -t 5000 -b -R spec test/index.js",
     "coveralls": "cat ./test/coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",

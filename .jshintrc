@@ -1,10 +1,11 @@
 {
   "browser": false,
+  "asi": true,
   "latedef": true,
   "eqeqeq" : true,
+  "esnext": true,
   "newcap": false,
   "node": true,
-  "strict": true,
   "newcap": true,
   "undef": true,
   "trailing": true,

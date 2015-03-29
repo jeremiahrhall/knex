@@ -1,0 +1,8 @@
+
+function alterTable() {
+
+}
+
+function alterColumn() {
+
+}
