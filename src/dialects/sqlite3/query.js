@@ -1,24 +1,4 @@
 
-
-// SQLite3 Query Builder & Compiler
-// -------
-module.exports = function(client) {
-
-var _        = require('lodash');
-var inherits = require('inherits');
-
-var Raw           = require('../../raw');
-var QueryBuilder  = require('../../query/builder');
-var QueryCompiler = require('../../query/compiler');
-
-// Query Builder
-// -------
-function QueryBuilder_SQLite3() {
-  this.client = client;
-  QueryBuilder.apply(this, arguments);
-}
-inherits(QueryBuilder_SQLite3, QueryBuilder);
-
 // Adds a raw `where` clause to the query.
 QueryBuilder_SQLite3.prototype.whereRaw =
 QueryBuilder_SQLite3.prototype.andWhereRaw = function(sql, bindings) {
@@ -33,14 +13,6 @@ QueryBuilder_SQLite3.prototype.andWhereRaw = function(sql, bindings) {
   });
   return this;
 };
-
-// Query Compiler
-// -------
-function QueryCompiler_SQLite3() {
-  this.formatter = new client.Formatter();
-  QueryCompiler.apply(this, arguments);
-}
-inherits(QueryCompiler_SQLite3, QueryCompiler);
 
 // The locks are not applicable in SQLite3
 QueryCompiler_SQLite3.prototype.forShare =
@@ -121,9 +93,4 @@ QueryCompiler_SQLite3.prototype.limit = function() {
 
   // Workaround for offset only, see http://stackoverflow.com/questions/10491492/sqllite-with-skip-offset-only-not-limit
   return 'limit ' + this.formatter.parameter((this.single.offset && noLimit) ? -1 : this.single.limit);
-};
-
-client.QueryBuilder = QueryBuilder_SQLite3;
-client.QueryCompiler = QueryCompiler_SQLite3;
-
 };

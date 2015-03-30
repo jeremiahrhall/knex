@@ -1,35 +1,7 @@
 
-
-// PostgreSQL Query Builder & Compiler
-// ------
-module.exports = function(client) {
-
-var _        = require('lodash');
-var inherits = require('inherits');
-
-var QueryBuilder  = require('../../query/builder');
-var QueryCompiler = require('../../query/compiler');
-
-// Query Builder
-// ------
-
-function QueryBuilder_PG() {
-  this.client = client;
-  QueryBuilder.apply(this, arguments);
-  if (client.defaultReturning) {
-    this._single.returning = client.defaultReturning;
-  }
+if (client.defaultReturning) {
+  this._single.returning = client.defaultReturning;
 }
-inherits(QueryBuilder_PG, QueryBuilder);
-
-// Query Compiler
-// ------
-
-function QueryCompiler_PG() {
-  this.formatter = new client.Formatter();
-  QueryCompiler.apply(this, arguments);
-}
-inherits(QueryCompiler_PG, QueryCompiler);
 
 // Compiles a truncate query.
 QueryCompiler_PG.prototype.truncate = function() {
@@ -132,9 +104,4 @@ QueryCompiler_PG.prototype.columnInfo = function() {
       return column && out[column] || out;
     }
   };
-};
-
-client.QueryBuilder = QueryBuilder_PG;
-client.QueryCompiler = QueryCompiler_PG;
-
 };

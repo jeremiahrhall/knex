@@ -1,10 +1,6 @@
 // Query Compiler
 // -------
 
-var _       = require('lodash');
-var helpers = require('../helpers');
-var Raw     = require('../raw');
-
 class SQL {
 
   constructor(statement = '', bindings = []) {
@@ -48,29 +44,27 @@ export default class QueryCompiler {
   }
 
   update() {
+    // [update(tableName), ]
+
+
     return new SQL(`UPDATE ${parameter(tableName)}`)
-
-
-    // Make sure tableName is processed by the formatter first.
-    var tableName  = this.tableName;
-    var updateData = this._prepUpdate(this.single.update);
-    var wheres     = this.where();
-    return 'update ' + tableName +
-      ' set ' + updateData.join(', ') +
-      (wheres ? ' ' + wheres : '');
+    return `UPDATE ${tableName} SET ${updateData.join(', ')}` (wheres ? ' ' + wheres : '');
   }
 
   // Compiles a `delete` query.
   del() {
+    
+
+    
     // Make sure tableName is processed by the formatter first.
-    var tableName  = this.tableName;
-    var wheres = this.where();
-    return `delete from ${tableName} `
+    var tableName = this.tableName
+    var wheres    = this.where()
+    return `delete from ${this.tableName} `
   }
 
   // Compiles a `truncate` query.
   truncate() {
-    return 'truncate ' + this.tableName;
+    return `truncate ${this.tableName}`
   }
 
   // Compiles the "locks".

@@ -1,9 +1,13 @@
 
-class Column extends Clause {
+class Column {
 
   constructor() {
     this.alias    = null
     this.distinct = false
+  }
+
+  build() {
+    
   }
 
 }

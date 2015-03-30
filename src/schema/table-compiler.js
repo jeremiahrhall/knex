@@ -1,24 +1,4 @@
 
-// Table Compiler
-// -------
-var _ = require('lodash');
-
-var helpers = require('../helpers');
-
-function TableCompiler(tableBuilder) {
-  this.method         = tableBuilder._method;
-  this.tableNameRaw   = tableBuilder._tableName;
-  this.single         = tableBuilder._single;
-  this.grouped        = _.groupBy(tableBuilder._statements, 'grouping');
-  this.initCompiler();
-}
-
-// Convert the tableCompiler toSQL
-TableCompiler.prototype.toSQL = function() {
-  this[this.method]();
-  return this.sequence;
-};
-
 // Column Compilation
 // -------
 
@@ -32,12 +12,12 @@ TableCompiler.prototype.create = function(ifNot) {
   this.columnQueries(columns);
   delete this.single.comment;
   this.alterTable();
-};
+}
 
 // Only create the table if it doesn't exist.
 TableCompiler.prototype.createIfNot = function() {
   this.create(true);
-};
+}
 
 // If we're altering the table, we need to one-by-one
 // go through and handle each of the queries associated
@@ -48,7 +28,7 @@ TableCompiler.prototype.alter = function() {
   this.addColumns(columnTypes);
   this.columnQueries(columns);
   this.alterTable();
-};
+}
 
 TableCompiler.prototype.foreign = function(foreignData) {
   if (foreignData.inTable && foreignData.references) {
@@ -61,7 +41,7 @@ TableCompiler.prototype.foreign = function(foreignData) {
     this.pushQuery('alter table ' + this.tableName() + ' add constraint ' + keyName + ' ' +
       'foreign key (' + column + ') references ' + inTable + ' (' + references + ')' + onUpdate + onDelete);
   }
-};
+}
 
 // Get all of the column sql & bindings individually for building the table queries.
 TableCompiler.prototype.getColumnTypes = function(columns) {
@@ -70,7 +50,7 @@ TableCompiler.prototype.getColumnTypes = function(columns) {
     memo.bindings.concat(column.bindings);
     return memo;
   }, {sql: [], bindings: []});
-};
+}
 
 // Adds all of the additional queries from the "column"
 TableCompiler.prototype.columnQueries = function(columns) {
@@ -81,7 +61,7 @@ TableCompiler.prototype.columnQueries = function(columns) {
   for (var i = 0, l = queries.length; i < l; i++) {
     this.pushQuery(queries[i]);
   }
-};
+}
 
 // Add a new column.
 TableCompiler.prototype.addColumnsPrefix = 'add column ';
@@ -97,7 +77,7 @@ TableCompiler.prototype.addColumns = function(columns) {
       bindings: columns.bindings
     });
   }
-};
+}
 
 // Compile the columns as needed for the current create or alter table
 TableCompiler.prototype.getColumns = function() {
@@ -107,11 +87,11 @@ TableCompiler.prototype.getColumns = function() {
     compiledColumns.push(new ColumnCompiler(this, columns[i].builder).toSQL());
   }
   return compiledColumns;
-};
+}
 
 TableCompiler.prototype.tableName = function() {
   return this.formatter.wrap(this.tableNameRaw);
-};
+}
 
 // Generate all of the alter column statements necessary for the query.
 TableCompiler.prototype.alterTable = function() {
@@ -127,18 +107,18 @@ TableCompiler.prototype.alterTable = function() {
   for (var item in this.single) {
     if (_.isFunction(this[item])) this[item](this.single[item]);
   }
-};
+}
 
 // Drop the index on the current table.
 TableCompiler.prototype.dropIndex = function(value) {
   this.pushQuery('drop index' + value);
-};
+}
 
 // Drop the unique
 TableCompiler.prototype.dropUnique =
 TableCompiler.prototype.dropForeign = function() {
   throw new Error('Method implemented in the dialect driver');
-};
+}
 
 TableCompiler.prototype.dropColumnPrefix = 'drop column ';
 TableCompiler.prototype.dropColumn = function() {
@@ -147,7 +127,7 @@ TableCompiler.prototype.dropColumn = function() {
     return this.dropColumnPrefix + this.formatter.wrap(column);
   }, this);
   this.pushQuery('alter table ' + this.tableName() + ' ' + drops.join(', '));
-};
+}
 
 // If no name was specified for this index, we will create one using a basic
 // convention of the table name, followed by the columns, followed by an
@@ -157,5 +137,3 @@ TableCompiler.prototype._indexCommand = function(type, tableName, columns) {
   var table = tableName.replace(/\.|-/g, '_');
   return (table + '_' + columns.join('_') + '_' + type).toLowerCase();
 };
-
-module.exports = TableCompiler;

@@ -1,8 +1,0 @@
-
-function createTable() {
-
-}
-
-function createView() {
-  
-}

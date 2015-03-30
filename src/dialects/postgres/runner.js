@@ -1,21 +1,4 @@
 
-
-module.exports = function(client) {
-
-var _        = require('lodash');
-var inherits = require('inherits');
-var Promise  = require('../../promise');
-
-var Runner = require('../../runner');
-
-// Inherit from the `Runner` constructor's prototype,
-// so we can add the correct `then` method.
-function Runner_PG() {
-  this.client = client;
-  Runner.apply(this, arguments);
-}
-inherits(Runner_PG, Runner);
-
 var PGQueryStream;
 Runner_PG.prototype._stream = Promise.method(function(obj, stream, options) {
   PGQueryStream = PGQueryStream || require('pg-query-stream');
@@ -72,9 +55,4 @@ Runner_PG.prototype.processResponse = function(obj) {
     return resp.rowCount;
   }
   return resp;
-};
-
-// Assign the newly extended `Runner` constructor to the client object.
-client.Runner = Runner_PG;
-
 };

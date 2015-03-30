@@ -1,25 +1,4 @@
 
-
-// MySQL Query Builder & Compiler
-// ------
-module.exports = function(client) {
-
-var _             = require('lodash');
-var inherits      = require('inherits');
-var QueryBuilder  = require('../../query/builder');
-var QueryCompiler = require('../../query/compiler');
-
-// Query Compiler
-// -------
-
-// Set the "Formatter" to use for the queries,
-// ensuring that all parameterized values (even across sub-queries)
-// are properly built into the same query.
-function QueryCompiler_MySQL() {
-  this.formatter = new client.Formatter();
-  QueryCompiler.apply(this, arguments);
-}
-
 QueryCompiler_MySQL.prototype._emptyInsertValue = '() values ()';
 
 // Update method, including joins, wheres, order & limits.
@@ -35,14 +14,14 @@ QueryCompiler_MySQL.prototype.update = function() {
     (where ? ' ' + where : '') +
     (order ? ' ' + order : '') +
     (limit ? ' ' + limit : '');
-};
+}
 
 QueryCompiler_MySQL.prototype.forUpdate = function() {
   return 'for update';
-};
+}
 QueryCompiler_MySQL.prototype.forShare = function() {
   return 'lock in share mode';
-};
+}
 
 // Compiles a `columnInfo` query.
 QueryCompiler_MySQL.prototype.columnInfo = function() {
@@ -62,8 +41,8 @@ QueryCompiler_MySQL.prototype.columnInfo = function() {
       }, {});
       return column && out[column] || out;
     }
-  };
-};
+  }
+}
 
 QueryCompiler_MySQL.prototype.limit = function() {
   var noLimit = !this.single.limit && this.single.limit !== 0;
@@ -71,11 +50,4 @@ QueryCompiler_MySQL.prototype.limit = function() {
 
   // Workaround for offset only, see http://stackoverflow.com/questions/255517/mysql-offset-infinite-rows
   return 'limit ' + ((this.single.offset && noLimit) ? '18446744073709551615' : this.formatter.parameter(this.single.limit));
-};
-
-// Set the QueryBuilder & QueryCompiler on the client object,
-// incase anyone wants to modify things to suit their own purposes.
-client.QueryBuilder  = QueryBuilder_MySQL;
-client.QueryCompiler = QueryCompiler_MySQL;
-
-};
+}

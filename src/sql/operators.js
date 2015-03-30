@@ -2,9 +2,9 @@ import isArray from 'lodash/lang/isArray'
 
 class Operator {
 
-  constructor(prefix, value) {
-    this.prefix = prefix
-    this.value  = value
+  constructor(type, value) {
+    this.type  = type
+    this.value = value
   }
 
 }
@@ -199,22 +199,6 @@ function or(...statements) {
     wrapped.push(or(statement))
   }
   return wrap(wrapped)
-}
-
-function xor() {
-
-}
-
-function mult() {
-
-}
-
-function add() {
-
-}
-
-function subtract() {
-
 }
 
   '=', '<', '>', '<=', '>=', '<>', '!=',

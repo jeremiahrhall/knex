@@ -1,24 +1,4 @@
 
-
-// Runner
-// -------
-module.exports = function(client) {
-
-var _        = require('lodash');
-var Promise  = require('../../promise');
-var Runner   = require('../../runner');
-var helpers  = require('../../helpers');
-
-var inherits = require('inherits');
-
-// Inherit from the `Runner` constructor's prototype,
-// so we can add the correct `then` method.
-function Runner_SQLite3() {
-  this.client = client;
-  Runner.apply(this, arguments);
-}
-inherits(Runner_SQLite3, Runner);
-
 Runner_SQLite3.prototype._beginTransaction = 'begin transaction;';
 
 // Runs the query on the specified connection, providing the bindings and any other necessary prep work.
@@ -91,9 +71,4 @@ Runner_SQLite3.prototype.processResponse = function(obj) {
     default:
       return response;
   }
-};
-
-// Assign the newly extended `Runner` constructor to the client object.
-client.Runner = Runner_SQLite3;
-
 };

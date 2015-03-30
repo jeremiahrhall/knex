@@ -16,7 +16,6 @@ Master:
 - CLI support for knexfiles that do not provide environment keys, #527
 - Added sqlite3 dialect version of whereRaw/andWhereRaw (#477).
 
-
 ## 0.7.4
 
 - Fix incorrect order of subquery arguments, #704

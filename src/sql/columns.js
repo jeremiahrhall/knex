@@ -1,5 +1,5 @@
 
-class Columns extends Clause {
+class Columns {
 
   construtor() {
     this.columns = []
@@ -11,10 +11,12 @@ class Columns extends Clause {
   }
 
   build() {
-
+    
   }
 
 }
+
+import {column} from './column'
 
 export function columns(...cols) {
   var compiled = new Columns()

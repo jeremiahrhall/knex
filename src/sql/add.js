@@ -1,8 +1,0 @@
-
-function addColumn() {
-
-}
-
-function addIndex() {
-
-}

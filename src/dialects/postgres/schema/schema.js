@@ -1,24 +1,5 @@
 
 
-// PostgreSQL Schema Builder & Compiler
-// -------
-module.exports = function(client) {
-
-var inherits = require('inherits');
-var Schema   = require('../../../schema');
-
-// Schema Builder
-// -------
-
-function SchemaBuilder_PG() {
-  this.client = client;
-  Schema.Builder.apply(this, arguments);
-}
-inherits(SchemaBuilder_PG, Schema.Builder);
-
-// Schema Compiler
-// -------
-
 function SchemaCompiler_PG() {
   this.client = client;
   this.Formatter = client.Formatter;
@@ -83,9 +64,4 @@ SchemaCompiler_PG.prototype.createExtension = function(extensionName) {
 
 SchemaCompiler_PG.prototype.createExtensionIfNotExists = function(extensionName) {
   this.pushQuery('create extension if not exists ' + this.formatter.wrap(extensionName));
-};
-
-client.SchemaBuilder = SchemaBuilder_PG;
-client.SchemaCompiler = SchemaCompiler_PG;
-
 };

@@ -1,10 +1,5 @@
+import {raw} from './sql/raw'
 
-// FunctionHelper
-// -------
-module.exports = {
-
-  now: function() {
-    return new this.client.Raw('CURRENT_TIMESTAMP');
-  }
-
-};
+export function now() {
+  return raw('CURRENT_TIMESTAMP')  
+}

@@ -1,19 +1,19 @@
-// Knex.js  0.7.5
+// Knex.js  0.9.0
 // --------------------
+
 // (c) 2013-2015 Tim Griesser
 // Knex may be freely distributed under the MIT license.
 // For details and documentation:
 // http://knexjs.org
 
+import assign     from 'lodash/object/assign'
+
 import Builder    from './query/builder'
 import Raw        from './raw'
 import {isEngine} from './helpers'
-import assign     from 'lodash/object/assign'
-
-// Each of the methods which may be statically chained from knex
 import {sql}      from './sql'
-import {SQL}      from './sql/sql'
 import {ddl}      from './ddl'
+import {SQL}      from './sql/sql'
 import {DDL}      from './ddl/ddl'
 
 export default function Knex(engineOrConf) {
@@ -29,8 +29,8 @@ assign(Knex, {
     return '0.9.0'
   },
 
-  // let {or, where} = knex.sql
-  // or(where('id', '<', 2), where('id', '>', 3))
+  // let {gt, lt, or, where} = knex.sql
+  // where(or(lt('id', 2), gt('id', 3)))
   sql,
 
   // let {OR, WHERE} = knex.sql
@@ -44,10 +44,19 @@ assign(Knex, {
   DDL,
 
   // new Builder([engine]).select('*').from('accounts')
-  Builder,
+  get builder() {
+    return new Builder()
+  },
 
   // new SchemaBuidler([engine]).createTable(tableName, () => {})
-  SchemaBuilder
+  get schema() {
+    return new SchemaBuilder()
+  },
+
+  raw(sql, bindings) {
+    deprecate('Knex.raw', 'Knex.sql.raw')
+    return sql.raw(sql, bindings)
+  }
 
 })
 
@@ -81,6 +90,8 @@ function makeKnex(engine) {
 
   assign(knex, emitter, {
 
+    engine,
+
     toString() {
       return `[object Knex:${engine.dialect}]`
     },
@@ -97,10 +108,6 @@ function makeKnex(engine) {
       return engine.destroy(cb)
     },
 
-    get sql() {
-      return SQL
-    },
-
     get seed() {
       return new Seeder(engine)
     },
@@ -115,10 +122,6 @@ function makeKnex(engine) {
 
     get client() {
       deprecate('knex.client', 'knex.engine')
-      return engine
-    },
-
-    get engine() {
       return engine
     },
 
@@ -151,9 +154,4 @@ function makeKnex(engine) {
   engine.on('query', obj => knex.emit('query', obj))
 
   return knex
-}
-
-Knex.raw = (sql, bindings) => {
-  deprecate('Knex.raw is deprecated, use Knex.sql.raw')
-  return Knex.sql.raw(sql, bindings)
 }

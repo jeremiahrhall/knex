@@ -5,8 +5,6 @@ class ColumnBuilder {
 
   }
 
-  
-
 }
 
 
@@ -19,9 +17,9 @@ var modifiers = [
 
 // Aliases for convenience.
 var aliasMethod = {
-  default: 'defaultTo',
+  default:    'defaultTo',
   defaultsTo: 'defaultTo',
-  notNull: 'notNullable'
+  notNull:    'notNullable'
 };
 
 // Alias a few methods for clarity when processing.

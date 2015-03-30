@@ -1,10 +1,10 @@
 // Builder
 // -------
-import _ from 'lodash'
+import _              from 'lodash'
 import {EventEmitter} from 'events'
-import helpers from './helpers'
-import JoinBuilder from './join-builder'
-import Statements from ''
+import helpers        from './helpers'
+import JoinBuilder    from './join-builder'
+import Statements     from ''
 import {extractAlias} from './helpers'
 
 // Typically called from `knex.builder`,
@@ -13,11 +13,17 @@ export class QueryBuilder extends EventEmitter {
 
   constructor(engine) {
     this.engine   = engine
-    this.elements = new Statments()
+    this.elements = new Statements()
 
     // Internal flags used in the builder.
     this.__boolFlag = false  // false === and, true === or
     this.__notFlag  = false  // true  === not
+  }
+
+  build(config) {
+    if (this._promise) {
+      
+    }
   }
 
   // A few getters to make the chain look nice:
@@ -130,6 +136,14 @@ export class QueryBuilder extends EventEmitter {
   // Adds an `or where` clause to the query.
   orWhere(...args) {
     return clause(this, or(where(...args)))
+  }
+
+  whereNot(...args) {
+    return clause(this, not(where(...args)))
+  }
+
+  orWhereNot(...args) {
+    return clause(this, not(or(where(...args))))
   }
 
   // Adds a raw `where` clause to the query.

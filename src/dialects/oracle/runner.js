@@ -1,29 +1,8 @@
 
-
-// Oracle Runner
-// ------
-module.exports = function(client) {
-
-var _        = require('lodash');
-var inherits = require('inherits');
-
-var Promise  = require('../../promise');
-var Runner   = require('../../runner');
-var helpers  = require('../../helpers');
-
 var OracleQueryStream = require('./oracle-query-stream');
 
-// Inherit from the `Runner` constructor's prototype,
-// so we can add the correct `then` method.
-function Runner_Oracle() {
-  this.client = client;
-  Runner.apply(this, arguments);
-}
-inherits(Runner_Oracle, Runner);
-
 Runner_Oracle.prototype._stream = Promise.method(function (obj, stream, options) {
-  var self = this;
-
+  
   obj.sql = this.client.positionBindings(obj.sql);
   if (this.isDebugging()) this.debug(obj);
 
@@ -99,6 +78,18 @@ Runner_Oracle.prototype.processResponse = function(obj) {
   }
 };
 
+// disable autocommit to allow correct behavior (default is true)
+Runner_Oracle.prototype.beginTransaction = function() {
+  return this.connection.setAutoCommit(false);
+};
+Runner_Oracle.prototype.commitTransaction = function() {
+  return finishOracleTransaction(this.connection, this.connection.commit);
+};
+Runner_Oracle.prototype.rollbackTransaction = function() {
+  return finishOracleTransaction(this.connection, this.connection.rollback);
+};
+
+
 function finishOracleTransaction(connection, finishFunc) {
   return new Promise(function (resolver, rejecter) {
     return finishFunc.bind(connection)(function (err, result) {
@@ -112,18 +103,3 @@ function finishOracleTransaction(connection, finishFunc) {
   });
 }
 
-// disable autocommit to allow correct behavior (default is true)
-Runner_Oracle.prototype.beginTransaction = function() {
-  return this.connection.setAutoCommit(false);
-};
-Runner_Oracle.prototype.commitTransaction = function() {
-  return finishOracleTransaction(this.connection, this.connection.commit);
-};
-Runner_Oracle.prototype.rollbackTransaction = function() {
-  return finishOracleTransaction(this.connection, this.connection.rollback);
-};
-
-// Assign the newly extended `Runner` constructor to the client object.
-client.Runner = Runner_Oracle;
-
-};

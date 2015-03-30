@@ -1,20 +1,4 @@
 
-
-// Oracle Migrator
-// ------
-module.exports = function(client) {
-
-var _        = require('lodash');
-var Migrator = require('../../migrate');
-var inherits = require('inherits');
-var Promise  = require('../../promise');
-
-function Migrator_Oracle() {
-  this.client = client;
-  Migrator.apply(this, arguments);
-}
-inherits(Migrator_Oracle, Migrator);
-
 // Create the migration table, if it doesn't already exist.
 Migrator_Oracle.prototype._createMigrationTable = function(tableName) {
   return this.knex.schema.createTable(tableName, function(t) {
@@ -46,8 +30,4 @@ Migrator_Oracle.prototype._getLastBatch = function() {
       this.select().max('batch').from(tableName);
     })
     .orderBy('migration_time', 'desc');
-};
-
-client.Migrator = Migrator_Oracle;
-
 };

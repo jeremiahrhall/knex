@@ -2,7 +2,7 @@
 class RawClause extends Clause {
 
   constructor(sql, bindings) {
-    this.sql = sql
+    this.sql      = sql
     this.bindings = bindings
   }
 
@@ -12,10 +12,7 @@ class RawClause extends Clause {
 
 }
 
-function raw(sql, bindings) {
-  if (isPlainObject(bindings)) {
-    var keys = Object.keys(bindings)
-  }
+export function raw(sql, bindings) {
   return new RawClause(sql, bindings)
 }
 
@@ -28,20 +25,6 @@ function raw(sql, bindings) {
     this.bindings = _.isArray(bindings) ? bindings :
       bindings ? [bindings] : [];
     this.interpolateBindings();
-
-
-function raw(sql, bindings) {
-  var raw = (sql instanceof Raw ? sql : new Raw(sql, bindings));
-  this._statements.push({
-    grouping: 'where',
-    type: 'whereRaw',
-    value: raw,
-    bool: this._bool()
-  });
-  return this
-}
-
-
 
   // Ensure all Raw / builder bindings are mixed-in to the ? placeholders
   // as appropriate.

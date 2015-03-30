@@ -6,6 +6,10 @@ class Table {
     this.columns   = columns
   }
 
+  toJSON() {
+    
+  }
+
   diff(engine) {
     return new Promise((resolver, rejecter) => {
       

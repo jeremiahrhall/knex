@@ -1,11 +1,3 @@
-// SQLite3
-// -------
-
-var Client  = require('../../client')
-var Promise = require('../../promise')
-
-// Lazy load the sqlite3 module, since we might just be using
-// the client to generate SQL strings.
 var sqlite3 = require('sqlite3')
 
 class Engine_SQLite3 extends Engine {
@@ -24,9 +16,8 @@ class Engine_SQLite3 extends Engine {
 
   // Get a raw connection from the database, returning a promise with the connection object.
   acquireRawConnection() {
-    var driver = this
-    return new Promise(function(resolve, reject) {
-      var db = new sqlite3.Database(driver.connectionSettings.filename, function(err) {
+    return new Promise((resolve, reject) => {
+      var db = new sqlite3.Database(engine.connectionSettings.filename, (err) => {
         if (err) return reject(err)
         resolve(db)
       })
@@ -42,4 +33,4 @@ class Engine_SQLite3 extends Engine {
     })
   }
 
-module.exports = Client_SQLite3
+}

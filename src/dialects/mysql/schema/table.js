@@ -1,16 +1,11 @@
 
-
-
 .hook('afterCreateTable', (result, table) => {
-
   
-
 })
 
-
 TableCompiler_MySQL.prototype.createQuery = function(columns, ifNot) {
-  var createStatement = ifNot ? 'create table if not exists ' : 'create table ';
-  
+  var createStatement = ifNot ? 'CREATE TABLE IF NOT EXISTS ' : 'CREATE TABLE ';
+
   var conn = {}, sql = createStatement + this.tableName() + ' (' + columns.sql.join(', ') + ')';
 
   // Check if the connection settings are set.
@@ -30,7 +25,7 @@ TableCompiler_MySQL.prototype.createQuery = function(columns, ifNot) {
   if (this.single.comment) {
     var comment = (this.single.comment || '');
     if (comment.length > 60) helpers.warn('The max length for a table comment is 60 characters');
-    sql += " comment = '" + comment + "'";
+    sql += ` comment = '${comment}'`;
   }
 
   this.pushQuery(sql);
@@ -54,12 +49,10 @@ TableCompiler_MySQL.prototype.renameColumn = function(from, to) {
   var table    = this.tableName();
   var wrapped  = this.formatter.wrap(from) + ' ' + this.formatter.wrap(to);
   this.pushQuery({
-    sql: 'show fields from ' + table + ' where field = ' +
-      this.formatter.parameter(from),
+    sql: `show fields from ${table} where field = ${parameter(from)}`
     output: function(resp) {
       var column = resp[0];
       var runner = this;
-      
       return compiler.getFKRefs(runner).get(0)
       .then(function (refs) {
         return Promise.try(function () {
@@ -85,23 +78,20 @@ TableCompiler_MySQL.prototype.renameColumn = function(from, to) {
     }
   });
 };
-TableCompiler_MySQL.prototype.getFKRefs = function (runner) {
-  var formatter = new this.Formatter();
 
-  var sql = 'SELECT KCU.CONSTRAINT_NAME, KCU.TABLE_NAME, KCU.COLUMN_NAME, '+
-            '       KCU.REFERENCED_TABLE_NAME, KCU.REFERENCED_COLUMN_NAME, '+
-            '       RC.UPDATE_RULE, RC.DELETE_RULE '+
-            'FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU '+
-            'JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC '+
-            '       USING(CONSTRAINT_NAME)' +
-            'WHERE KCU.REFERENCED_TABLE_NAME = ' + formatter.parameter(this.tableNameRaw) + ' '+
-            '  AND KCU.CONSTRAINT_SCHEMA = ' + formatter.parameter(this.client.databaseName);
+function getFKRefs(runner) {
+  let kcu = alias('INFORMATION_SCHEMA.KEY_COLUMN_USAGE')
+  let rc  = alias('INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS')
+  select(
+    kcu.c(['CONSTRAINT_NAME', 'TABLE_NAME', 'COLUMN_NAME', 'REFERENCED_TABLE_NAME', 'REFERENCED_COLUMN_NAME']),
+    rc.c(['UPDATE_RULE', 'DELETE_RULE'])
+  ), 
+  from(kcu), 
+  join(rc, using(wrap('CONSTRAINT_NAME'))),
+  where(kcu.c('REFERENCED_TABLE_NAME'), parameter(this.tableName))
+  where(kcu.c('CONSTRAINT_SCHEMA'), parameter(this.databaseName))
+}
 
-  return runner.query({
-    sql: sql,
-    bindings: formatter.bindings
-  });
-};
 TableCompiler_MySQL.prototype.dropFKRefs = function (runner, refs) {
   var formatter = new this.Formatter();
   
@@ -112,6 +102,7 @@ TableCompiler_MySQL.prototype.dropFKRefs = function (runner, refs) {
     });
   }.bind(this)));
 };
+
 TableCompiler_MySQL.prototype.createFKRefs = function (runner, refs) {
   var formatter = new this.Formatter();
   
@@ -129,6 +120,7 @@ TableCompiler_MySQL.prototype.createFKRefs = function (runner, refs) {
     });
   }.bind(this)));
 };
+
 TableCompiler_MySQL.prototype.index = function(columns, indexName) {
   indexName = indexName || this._indexCommand('index', this.tableNameRaw, columns);
   this.pushQuery('alter table ' + this.tableName() + " add index " + indexName + "(" + this.formatter.columnize(columns) + ")");

@@ -57,8 +57,8 @@ class Engine extends EventEmitter {
   }
 
   // Return the database being used by this engine.
-  database() {
-    return this.databaseName || this.connectionSettings.database;
+  get databaseName() {
+    return this.connectionSettings.database
   }
 
 }

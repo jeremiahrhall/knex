@@ -1,7 +1,35 @@
 
-class UpdateClause extends Clause {
+class UpdateClause {
 
-  
+  constructor(tableName) {
+    this.tableName = tableName
+  }
+
+  build() {
+    
+  }
+
+}
+
+class SetValues {
+
+  constructor(values) {
+    this.values = values
+  }
+
+  build() {
+
+  }
+
+}
+
+// sql(update(tableName), set(values))
+export function update(tableName) {
+  return new UpdateClause(tableName)
+}
+
+// 
+export function set(values) {
 
 }
 

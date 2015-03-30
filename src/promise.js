@@ -1,7 +1,7 @@
-var Promise = require('bluebird/js/main/promise')();
+var Promise = require('bluebird/js/main/promise')()
 
 Promise.prototype.exec = function(cb) {
-  console.log('.exec is deprecated, please switch to .asCallback')
+  deprecate('knex.exec', 'knex.asCallback')
   return this.asCallback(cb);
 }
 

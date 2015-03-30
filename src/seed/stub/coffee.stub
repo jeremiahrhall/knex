@@ -1,3 +1,4 @@
+
 exports.seed = (knex, Promise) ->
   Promise.join(
     # Deletes ALL existing entries
