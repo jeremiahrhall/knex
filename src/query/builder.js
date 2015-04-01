@@ -1,34 +1,50 @@
 // Builder
 // -------
-import _              from 'lodash'
-import {EventEmitter} from 'events'
-import helpers        from './helpers'
-import JoinBuilder    from './join-builder'
-import Statements     from ''
-import {extractAlias} from './helpers'
+import {EventEmitter}  from 'events'
+import JoinBuilder     from './join-builder'
+import Elements        from './elements'
+import knexInterface   from '../interface'
+import whereInterface  from './interfaces/where'
+import havingInterface from './interfaces/where'
+
+import {extractAlias, mixin, clause} from '../helpers'
+import {
+  columns, column, table, not, or, set, values,
+  where, whereIn, whereExists, whereBetween
+} from '../sql'
 
 // Typically called from `knex.builder`,
 // start a new query building chain.
-export class QueryBuilder extends EventEmitter {
+export default class QueryBuilder extends EventEmitter {
 
   constructor(engine) {
     this.engine   = engine
-    this.elements = new Statements()
+    this.elements = new Elements()
 
     // Internal flags used in the builder.
     this.__boolFlag = false  // false === and, true === or
     this.__notFlag  = false  // true  === not
+    this.__cache    = false
   }
 
-  build(config) {
+  compile(config) {
     if (this._promise) {
       
     }
+    if (this.__cache) return this.__cache
+    for (var item of this.elements) {
+
+    }
+  }
+
+  [Symbol.iterator]() {
+    return this.elements[Symbol.iterator]()
   }
 
   // A few getters to make the chain look nice:
 
   get and() {
+    this.__boolFlag = false
     return this
   }
   get or() {
@@ -59,20 +75,27 @@ export class QueryBuilder extends EventEmitter {
 
   // Sets the values for a `select` query,
   // which is the same as specifying the columns.
-  select(...args) {
-    return clause(this, columns(...args))
+  select() {
+    switch(arguments.length) {
+      case 0: return this;
+      case 1: return clause(this, column(arguments[0]))
+    }
+    return clause(this, columns(...arguments))
   }
 
   // Allow for the current statement to be aliased
   as(ident) {
-    return clause(this, alias(ident), true)
+    return clause(this, aliasAs(ident), true)
   }
 
   // Sets the `tableName` on the query.
-  // Alias to "from" for select and "into" for insert statements
+  // Alias to "from" for select and "into" for insert clauses
   // e.g. builder.insert({a: value}).into('tableName')
   table(tableName) {
-    return clause(this, table(extractAlias(tableName)), true)
+    var [tbl, aliased] = extractAlias(tableName)
+    tbl = table(tbl)
+    if (aliased) tbl = aliasAs(tbl, aliased)
+    return clause(this, tbl, true)
   }
 
   // Adds a `distinct` clause to the query.
@@ -80,15 +103,11 @@ export class QueryBuilder extends EventEmitter {
     return clause(this, distinct(columns(...arguments)))
   }
 
-  // Adds a join clause to the query, allowing for advanced joins
-  // with an anonymous function as the second argument.
-  // function(table, first, operator, second)
+  // JOIN(s)
+
   join(...args) {
     return clause(this, innerJoin(args))
   }
-
-  // JOIN blocks:
-  // ----------
   
   innerJoin(...args) {
     return clause(this, innerJoin(args))
@@ -126,232 +145,93 @@ export class QueryBuilder extends EventEmitter {
     return clause(this, joinRaw(args))
   }
 
-  // The where function can be used in several ways:
-  // The most basic is `where(key, value)`, which expands to
-  // where key = value.
-  where(...args) {
-    return clause(this, where(...args))
-  }
+  // GROUP BY ${col}
 
-  // Adds an `or where` clause to the query.
-  orWhere(...args) {
-    return clause(this, or(where(...args)))
-  }
-
-  whereNot(...args) {
-    return clause(this, not(where(...args)))
-  }
-
-  orWhereNot(...args) {
-    return clause(this, not(or(where(...args))))
-  }
-
-  // Adds a raw `where` clause to the query.
-  whereRaw(sql, bindings) {
-    return clause(this, where(raw(...args)))
-  }
-
-  orWhereRaw(sql, bindings) {
-    return clause(this, or(where(raw(...args))))
-  }
-
-  // Helper for compiling any advanced `where` queries.
-  whereWrapped(callback) {
-    return clause(this, wrap(where(callback)))
-  }
-
-  // Adds a `where exists` clause to the query.
-  whereExists(callback) {
-    return clause(this, whereExists(callback))
-  }
-
-  // Adds an `or where exists` clause to the query.
-  orWhereExists(callback) {
-    return clause(this, or(whereExists(callback)))
-  }
-
-  // Adds a `where not exists` clause to the query.
-  whereNotExists(callback) {
-    return clause(this, not(whereExists(callback)))
-  }
-
-  // Adds a `or where not exists` clause to the query.
-  orWhereNotExists(callback) {
-    return clause(this, or(not(whereExists(callback))))
-  }
-
-  // Adds a `where in` clause to the query.
-  whereIn(column, value) {
-    return clause(this, whereIn(column, value))
-  }
-
-  // Adds a `or where in` clause to the query.
-  // Arguments: column, values
-  orWhereIn(column, value) {
-    return clause(this, or(whereIn(column, value)))
-  }
-
-  // Adds a `where not in` clause to the query.
-  whereNotIn(column, value) {
-    return clause(this, not(whereIn(column, value))
-  }
-
-  // Adds a `or where not in` clause to the query.
-  orWhereNotIn(column, value) {
-    return clause(this, or(not(whereIn(column, value))))
-  }
-
-  // Adds a `where null` clause to the query.
-  whereNull(column) {
-    return clause(this, where(isNull(column)))
-  }
-
-  // Adds a `or where null` clause to the query.
-  orWhereNull(column) {
-    return clause(this, or(where(isNull(column)))
-  }
-
-  // Adds a `where not null` clause to the query.
-  whereNotNull(column) {
-    return clause(this, not(where(isNull(column))))
-  }
-
-  // Adds a `or where not null` clause to the query.
-  orWhereNotNull(column) {
-    return clause(this, or(not(where(isNull(column))))
-  }
-
-  // Adds a `where between` clause to the query.
-  whereBetween(column, values) {
-    return clause(this, where(between(column, values)))
-  }
-
-  // Adds a `where not between` clause to the query.
-  whereNotBetween(column, values) {
-    return clause(this, not(where(between(column, values))))
-  }
-
-  // Adds a `or where between` clause to the query.
-  orWhereBetween(column, values) {
-    return clause(this, or(where(between(column, values))))
-  }
-
-  // Adds a `or where not between` clause to the query.
-  orWhereNotBetween(column, values) {
-    return clause(this, or(not(where(between(column, values)))))
-  }
-
-  // Adds a `group by` clause to the query.
   groupBy(item) {
     return clause(this, groupBy(item))
   }
 
-  // Adds a raw `group by` clause to the query.
   groupByRaw(sql, bindings) {
     return clause(this, groupBy(raw(sql, bindings)))
   }
 
-  // Adds a `order by` clause to the query.
+  // ORDER BY ${col}
+
   orderBy(column, direction) {
     return clause(this, orderBy(column, direction))
   }
 
-  // Add a raw `order by` clause to the query.
   orderByRaw(sql, bindings) {
     return clause(this, orderBy(raw(sql, bindings)))
   }
 
-  // Add a union statement to the query.
+  // UNION [ALL] ${col}
+
   union(value, wrap) {
     if (wrap) return clause(this, wrap(union(value)))
     return clause(this, union(value))
   }
 
-  // Adds a union all statement to the query.
   unionAll(value, wrap) {
     if (wrap) return clause(this, wrap(unionAll(value)))
     return clause(this, unionAll(value))
   }
 
-  // Adds a `having` clause to the query.
-  having() {
-    return clause(this, having(...arguments))
-  }
+  // LIMIT ${n}
 
-  // Adds an `or having` clause to the query.
-  orHaving() {
-    return clause(this, or(having(...arguments)))
-  }
-  
-  havingRaw(sql, bindings) {
-    return clause(this, having(raw(sql, bindings)))
-  }
-  
-  orHavingRaw(sql, bindings) {
-    return clause(this, or(having(raw(sql, bindings))))
-  }
-
-  // Helper for compiling any advanced `having` queries.
-  havingWrapped(callback) {
-    return clause(this, wrap(having(callback)))
-  }  
-
-  // Only allow a single "offset" to be set for the current query.
-  offset(value) {
-    return clause(this, offset(value), true)
-  }
-
-  // Only allow a single "limit" to be set for the current query.
   limit(value) {
     return clause(this, limit(value), true)
   }
 
-  // Retrieve the "count" result of the query.
+  // OFFSET ${n}
+
+  offset(value) {
+    return clause(this, offset(value), true)
+  }
+
+  // aggregates:
+  
   count(column) {
-    return clause(this, count(column))
+    return aggregate(this, 'COUNT', column)
   }
 
-  // Retrieve the minimum value of a given column.
   min(column) {
-    return aggregate(this, min, column)
+    return aggregate(this, 'MIN', column)
   }
 
-  // Retrieve the maximum value of a given column.
   max(column) {
-    return aggregate(this, max, column)
+    return aggregate(this, 'MAX', column)
   }
 
-  // Retrieve the sum of the values of a given column.
   sum(column) {
-    return aggregate(this, sum, column)
+    return aggregate(this, 'SUM', column)
   }
 
-  // Retrieve the average of the values of a given column.
   avg(column) {
-    return aggregate(this, avg, column)
+    return aggregate(this, 'AVG', column)
   }
 
-  // Increments a column's value by the specified amount.
+  // increment / decrement helpers
+
   increment(column, amount = 1) {
-    return clause(this, modifier('update'))
+    return clause(this, statementType('update'), true)
       .set(column, wrap(column(column), '', ` + ${int(amount)}`))
   }
 
-  // Decrements a column's value by the specified amount.
   decrement(column, amount = 1) {
-    return clause(this, modifier('update'))
+    return clause(this, statementType('update'), true)
       .set(column, wrap(column(column), '', ` - ${int(amount)}`))
   }
 
-  // Sets the values for a `select` query, informing that only the first
-  // row should be returned (limit 1).
+  // First object / pluck helpers
+
   first() {
-    return clause(this, modifier('first'))
+    // onBeforeBuild -> order by, limit ??
+    return this.hook('onResult', (rows) => rows && rows[0])
   }
 
-  // Pluck a column from a query.
   pluck(column) {
-    return clause(this, modifier('pluck', column))
+    return this.hook('onRow', (row) => pluck(row, column))
   }
 
   // Insert & Update
@@ -359,22 +239,27 @@ export class QueryBuilder extends EventEmitter {
 
   // Sets the values for an `insert` query.
   insert(values, returning) {
-    this._method = 'insert'
-    if (!_.isEmpty(returning)) this.returning(returning)
-    this._single.insert = values
-    return this
+    switch(arguments.length) {
+      case 1: return this.values(values)
+      case 2: return this.values(values).returning(returning)
+    }
   }
 
+  // insertInto(tableName).values(vals)
   insertInto(tableName) {
-    return this.tableName(tableName)
+    return this.into(tableName)
   }
 
-  values(insertValues) {
-    
+  // .values(vals)
+  values(vals) {
+    return clause(this, values(vals), true)
   }
 
-  // Sets the values for an `update`, allowing for both
-  // `.update(key, value, [returning])` and `.update(obj, [returning])` syntaxes.
+  // Sets the values for an `update`, allowing for:
+  // .update(tableName).set(values)
+  // .update(tableName).set(key, value)
+  // .update(key, value, [returning])
+  // .update(values, [returning])
   update(...args) {
     switch(args.length) {
       case 3: return this.update([args[1], args[2]], args[3])
@@ -388,14 +273,15 @@ export class QueryBuilder extends EventEmitter {
           return this.tableName(args[0])
         }
     }
-    return clause(this, modifier('update', set(args[0])))
+    return clause(this, statementType('update', set(args[0])))
   }
 
   set(key, value) {
-    switch (arguments.length) {
-      case 1: 
-      case 2: 
-    }
+    
+  }
+
+  upsert(columns) {
+    // ?? TODO
   }
 
   withClause(clause) {
@@ -419,17 +305,17 @@ export class QueryBuilder extends EventEmitter {
     switch (arguments.length) {
       case 1: return this.returning(ret).delete()
     }
-    return clause(this, modifier('delete'), true)
+    return clause(this, statementType('delete'), true)
   }
 
   // Truncates a table, ends the query chain.
   truncate() {
-    return clause(this, modifier('truncate'), true)
+    return clause(this, statementType('truncate'), true)
   }
 
   // Retrieves columns for the table specified by `knex(tableName)`
   columnInfo(column) {
-    return clause(this, modifier('columnInfo', column), true)
+    return clause(this, statementType('columnInfo', column), true)
   }
 
   // Set a lock for update constraint.
@@ -444,40 +330,21 @@ export class QueryBuilder extends EventEmitter {
 
 }
 
-mixin(QueryBuilder, builderInterface)
+mixin(QueryBuilder, knexInterface)
+mixin(QueryBuilder, whereInterface)
+mixin(QueryBuilder, havingInterface)
 
-function clause(builder, statement, single) {
-  builder.__cache = false
-  if (builder.__notFlag) {
-    builder.__notFlag = false
-    return clause(builder, not(statement))
-  }
-  if (builder.__boolFlag) {
-    builder.__boolFlag = false
-    return clause(builder, or(statement))
-  }
-  if (single) {
-    builder.statements[statement.type] = statement
-    return builder
-  }
-  if (!builder.statements.hasOwnProperty(statement.type)) {
-    builder.statements[statement.type] = []
-  }
-  builder.statements[statement.type].push(statement)
-  return builder
-}
-
-function aggregate(builder, fn, column) {
-  var extracted = extractAlias(column)
-  if (extracted !== column) {
-    return alias(extracted.column, )
-  }
+function aggregate(builder, fnName, column) {
+  var [ident, aliased] = extractAlias(column)
+  var agg = fn(fnName, ident)
+  if (aliased) agg = alias(agg, aliased)
+  return agg
 }
 
 function int(val) {
   val = parseInt(val, 10)
   if (isNaN(val)) return 0
-  return val;
+  return val
 }
 
 // Aliases:

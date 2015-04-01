@@ -1,7 +1,23 @@
 
+wrapValue = function(value) {
+  return (value !== '*' ? '"' + value.replace(/"/g, '""') + '"' : '*');
+}
+
+var hooks = {
+
+  raw(builder, statement, original) {
+    if (typeof statement === 'boolean') {
+      
+    }
+  }
+
+
+}
+
+
 // Adds a raw `where` clause to the query.
-QueryBuilder_SQLite3.prototype.whereRaw =
-QueryBuilder_SQLite3.prototype.andWhereRaw = function(sql, bindings) {
+whereRaw =
+andWhereRaw = function(sql, bindings) {
   // sqlite uses ints for bools, so cast true/false to 1/0
   if (typeof sql === 'boolean') { sql = Number(sql); }
   var raw = (sql instanceof Raw ? sql : new Raw(sql, bindings));

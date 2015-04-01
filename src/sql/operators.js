@@ -1,207 +1,257 @@
-import isArray from 'lodash/lang/isArray'
+import isArray   from 'lodash/lang/isArray'
+import * as kwd  from './keywords'
+
+import {
+  parameter as p, 
+  identifier as i
+} from './wrapping'
+
 
 class Operator {
-
-  constructor(type, value) {
-    this.type  = type
-    this.value = value
+  get grouping() {
+    return this.statement.grouping
   }
+}
+
+// AND, OR, NOT
+class LogicalOperator extends Operator {}
+
+class AllOperator extends LogicalOperator {
+
+  constructor(expression, comparison, subquery) {
+    this.expression = expression
+    this.comparison = comparison
+    this.subquery   = subquery
+    this.type       = 'AllOperator'
+  }
+
+  nodes() {
+    return [this.value, this.statement]
+  }
+}
+
+function all(fn) {
 
 }
 
-function any(subquery) {
+// <, >, <=, >=, =, <>, !=, BETWEEN
+class ComparisonOperator extends Operator {
+  constructor(operator, lhs, rhs) {
+    this.lhs      = lhs
+    this.rhs      = rhs
+    this.operator = operator
+    this.type     = 'ComparisonOperator'
+  }
+  nodes() {
+    return [i(this.lhs), this.operator, p(this.rhs)]
+  }
+}
+
+class BetweenOperator extends ComparisonOperator {
+  nodes() {
+    return [this.operator, p(this.lhs), kwd.AND, p(this.rhs)]
+  }
+}
+
+// +, -, *, /, %, ^, |/, ||/, !, !!, @, &, |, #, ~, <<, >>
+class ArithmeticOperator extends Operator {
+  constructor() {
+    this.type = 'ArithmeticOperator'
+  }
+  nodes() {
+    
+  }
+}
+
+export function between(a, b) {
+  return new BetweenOperator(kwd.BETWEEN, a, b)
+}
+
+export function not(statement) {
+  return new LogicalOperator(kwd.NOT, statement)
+}
+
+export function or(statement) {
+  return new LogicalOperator(kwd.OR, statement)
+}
+
+export function any(subquery) {
   
 }
 
-function some(subquery) {
+export function some(subquery) {
 
 }
 
 // Comparison
 
 // =
-function eq() {
+export function eq() {
   
 }
 
+// !=, <>
+export function notEq() {
+
+}
+
 // <
-function lt() {
+export function lt() {
 
 }
 
 // >
-function gt() {
+export function gt() {
 
 }
 
 // <=
-function lte() {
+export function lte() {
 
 }
 
 // >=
-function gte() {
+export function gte() {
 
 }
-
-// <>, !=
-// not(eq())
 
 // Mathematical
 
 // +
-function add(a, b) {
-  switch(arguments.length) {
-
-  }
+export function add(a, b) {
+  
 }
 
 // -
-function subtract() {
+export function subtract() {
 
 }
 
 // *
-function multiply() {
+export function multiply() {
 
 }
 
 // /
-function divided() {
+export function divided() {
 
 }
 
 // %
-function modulo() {
+export function modulo() {
 
 }
 
 // ^
-function exponent() {
+export function exponent() {
 
 }
 
 // |/
-function sqrt() {
+export function sqrt() {
 
 }
 
 // ||/
-function cubeRoot() {
+export function cubeRoot() {
 
 }
 
 // !
-function factorial() {
+export function factorial() {
 
 }
 
 // !!
-function factorialPrefix() {
+export function factorialPrefix() {
 
 }
 
 // @
-function abs() {
+export function abs() {
 
 }
 
 // &
-function bitwiseAnd() {
+export function bitwiseAnd() {
 
 }
 
 // |
-function bitwiseOr() {
+export function bitwiseOr() {
 
 }
 
 // #
-function xor() {
+export function xor() {
 
 }
 
 // ~
-function bitwiseNot() {
+export function bitwiseNot() {
 
 }
 
 // <<
-function leftShift() {
+export function rightShift() {
+
+}
+
+// <<
+export function leftShift() {
 
 }
 
 // IS NULL
-function isNull() {
+export function isNull() {
 
 }
 
-function and() {
+export function and() {
 
 }
 
-function like() {
+export function like() {
   
 }
 
-function ilike() {
+export function ilike() {
 
 }
 
-function between() {
-  
-}
-
-function tilde() {
+export function rlike() {
 
 }
 
-function tildeStar() {
+export function regexp() {
 
 }
 
-function bangTilde() {
+// // MySQL:
+// '=', '<', '>', '<=', '>=', '<>', '!=',
+// 'like', 'not like', 'between', 'ilike',
+// '&', '|', '^', '<<', '>>',
+// 'rlike', 'regexp', 'not regexp'
 
-}
+// // Oracle:
+// '=', '<', '>', '<=', '>=', '<>', '!=',
+// 'like', 'not like', 'between', 'ilike',
+// '&', '|', '^', '<<', '>>',
+// 'rlike', 'regexp', 'not regexp'
 
-function bangTildeStar() {
+// // PG:
+// '=', '<', '>', '<=', '>=', '<>', '!=',
+// 'like', 'not like', 'between', 'ilike', '~', '~*', '!~', '!~*',
+// '&', '|', '#', '<<', '>>', '&&', '^', '@>', '<@', '||'
 
-}
+// // Baseline:
+// '=', '<', '>', '<=', '>=', '<>', '!=',
+// 'like', 'not like', 'between', 'ilike',
+// '&', '|', '^', '<<', '>>',
+// 'rlike', 'regexp', 'not regexp'
 
-function rlike() {
+// // SQLite3:
+// '=', '<', '>', '<=', '>=', '<>', '!=',
+// 'like', 'not like', 'between', 'ilike',
+// '&', '|', '<<', '>>'
 
-}
-
-function regexp() {
-
-}
-
-function leftShift() {
-
-}
-
-function rightShift() {
-
-}
-
-function or(...statements) {
-  if (statements.length === 0) {
-    return empty()
-  }
-  if (statements.length === 1) {
-    if (isArray(statements[0])) {
-      return or(...statements[0])
-    }
-    return new Operator('OR', statement)
-  }
-  var wrapped = []
-  for (var statement of statements) {
-    wrapped.push(or(statement))
-  }
-  return wrap(wrapped)
-}
-
-  '=', '<', '>', '<=', '>=', '<>', '!=',
-  'like', 'not like', 'between', 'ilike',
-  '&', '|', '^', '<<', '>>',
-  'rlike', 'regexp', 'not regexp'

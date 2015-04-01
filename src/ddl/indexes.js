@@ -8,8 +8,8 @@ class Key {
     this.action  = null
   }
 
-  build() {
-
+  compile(options) {
+    
   }
 
 }
@@ -28,14 +28,14 @@ export function primaryKey(columns, keyName) {
   return new Key('PRIMARY', columns, keyName)
 }
 
-export function index() {
+export function index(columns, keyName) {
   return new Key('INDEX', columns, keyName)
 }
 
-export function unique() {
+export function unique(columns, keyName) {
   return new Key('UNIQUE', columns, keyName)
 }
 
-export function foreignKey() {
+export function foreignKey(columns, keyName) {
   return new Key('FOREIGN', columns, keyName)
 }

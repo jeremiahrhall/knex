@@ -6,17 +6,16 @@
 // For details and documentation:
 // http://knexjs.org
 
-import assign     from 'lodash/object/assign'
+import assign from 'lodash/object/assign'
 
-import Builder    from './query/builder'
+import Builder       from './query/builder'
+// import SchemaBuilder from './schema/builder'
+
 import Raw        from './raw'
-import {isEngine} from './helpers'
 import {sql}      from './sql'
 import {ddl}      from './ddl'
-import {SQL}      from './sql/sql'
-import {DDL}      from './ddl/ddl'
 
-export default function Knex(engineOrConf) {
+function Knex(engineOrConf) {
   if (!isEngine(engineOrConf)) {
     return Knex(makeEngine(engineOrConf))
   }
@@ -30,32 +29,22 @@ assign(Knex, {
   },
 
   // let {gt, lt, or, where} = knex.sql
+  // or(where('id', '<', 2), where('id', '>', 3))
   // where(or(lt('id', 2), gt('id', 3)))
   sql,
 
-  // let {OR, WHERE} = knex.sql
-  // OR(WHERE('id', '<', 2), WHERE('id', '>', 3))
-  SQL,
-
   // knex.ddl.alterTable('tableName')
-  ddl,
-
-  // knex.ddl.ALTER_TABLE('tableName')
-  DDL,
+  // ddl,
 
   // new Builder([engine]).select('*').from('accounts')
-  get builder() {
-    return new Builder()
-  },
+  Builder,
 
   // new SchemaBuidler([engine]).createTable(tableName, () => {})
-  get schema() {
-    return new SchemaBuilder()
-  },
+  // SchemaBuidler,
 
-  raw(sql, bindings) {
+  raw(query, bindings) {
     deprecate('Knex.raw', 'Knex.sql.raw')
-    return sql.raw(sql, bindings)
+    return sql.raw(query, bindings)
   }
 
 })
@@ -64,7 +53,7 @@ function makeEngine(config) {
   var Engine
   var dialectStr = dialectAlias[config.dialect] || config.dialect
   try {
-    Engine = require(`${__dirname}/dialects/${dialectStr}`)  
+    Engine = null // require(`${__dirname}/dialects/${dialectStr}`)  
   } catch (e) {
     throw new Error(`${dialectStr} is not a valid Knex client, did you misspell it?`)
   }
@@ -72,10 +61,10 @@ function makeEngine(config) {
 }
 
 const dialectAlias = {
-  'mariadb'       : 'maria'
-  'mariasql'      : 'maria'
-  'pg'            : 'postgres'
-  'postgresql'    : 'postgres'
+  'mariadb'       : 'maria',
+  'mariasql'      : 'maria',
+  'pg'            : 'postgres',
+  'postgresql'    : 'postgres',
   'sqlite'        : 'sqlite3'
 }
 
@@ -83,7 +72,11 @@ function makeKnex(engine) {
 
   function knex(tableName) {
     var builder = new Builder(engine)
-    if (tableName) return builder.table(tableName)
+    if (!tableName) {
+      warn('invoking knex without a table is deprecated')
+      return builder
+    }
+    return builder.table(tableName)
   }
   
   var emitter = new EventEmitter()
@@ -106,6 +99,10 @@ function makeKnex(engine) {
 
     destroy(cb) {
       return engine.destroy(cb)
+    },
+
+    multi(statements, options) {
+      return engine.multi(statements, options)
     },
 
     get seed() {
@@ -142,7 +139,7 @@ function makeKnex(engine) {
 
   // Most of the standard sql functions may be used to kick off 
   // a query chain.
-  Object.keys(sql).forEach((method) => {
+  Object.keys(sql).forEach(method => {
     knex[method] = () => {
       var builder = new Builder(engine)
       return builder[method].apply(builder, arguments);
@@ -155,3 +152,5 @@ function makeKnex(engine) {
 
   return knex
 }
+
+export default Knex

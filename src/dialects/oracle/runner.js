@@ -89,7 +89,6 @@ Runner_Oracle.prototype.rollbackTransaction = function() {
   return finishOracleTransaction(this.connection, this.connection.rollback);
 };
 
-
 function finishOracleTransaction(connection, finishFunc) {
   return new Promise(function (resolver, rejecter) {
     return finishFunc.bind(connection)(function (err, result) {

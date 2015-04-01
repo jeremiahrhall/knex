@@ -1,39 +1,28 @@
-
-
-// MySQL Runner
-// ------
-module.exports = function(client) {
-
-var _        = require('lodash');
-var inherits = require('inherits');
-
-var Promise  = require('../../promise');
-var Runner   = require('../../runner');
-var helpers  = require('../../helpers');
+import Promise from '../../promise'
+import Runner  from '../../runner'
+import {skim}  from '../../helpers'
 
 export default class Runner_MySQL2 extends Runner {
 
   // Grab a connection, run the query via the MySQL streaming interface,
   // and pass that through to the stream we've sent back to the client.
-  Runner_MySQL2.prototype._stream = Promise.method(function(sql, stream, options) {
+  _stream(sql, stream, options) {
     /*jshint unused: false*/
     var runner = this;
     return new Promise(function(resolver, rejecter) {
       stream.on('error', rejecter);
       stream.on('end', resolver);
       return runner.query(sql).map(function(row) {
-        stream.write(row);
-      }).catch(function(err) {
-        stream.emit('error', err);
-      }).then(function() {
-        stream.end();
-      });
+        stream.write(row)
+      })
+      .catch((err) => stream.emit('error', err))
+      .then(() => stream.end())
     });
-  });
+  }
 
   // Runs the query on the specified connection, providing the bindings
   // and any other necessary prep work.
-  Runner_MySQL2.prototype._query = Promise.method(function(obj) {
+  _query(obj) {
     var sql = obj.sql;
     if (this.isDebugging()) this.debug(obj);
     if (obj.options) sql = _.extend({sql: sql}, obj.options);
@@ -46,31 +35,29 @@ export default class Runner_MySQL2 extends Runner {
         resolver(obj);
       });
     });
-  });
+  }
 
   // Process the response as returned from the query.
-  Runner_MySQL2.prototype.processResponse = function(obj) {
-    var response = obj.response;
-    var method   = obj.method;
-    var rows     = response[0];
-    var fields   = response[1];
-    if (obj.output) return obj.output.call(this, rows, fields);
+  processResponse(obj) {
+    var [rows, fields] = obj.response
+    var method = obj.method
+    if (obj.output) return obj.output.call(this, rows, fields)
     switch (method) {
       case 'select':
       case 'pluck':
       case 'first':
-        var resp = helpers.skim(rows);
-        if (method === 'pluck') return _.pluck(resp, obj.pluck);
-        return method === 'first' ? resp[0] : resp;
+        var resp = helpers.skim(rows)
+        if (method === 'pluck') return _.pluck(resp, obj.pluck)
+        return method === 'first' ? resp[0] : resp
       case 'insert':
-        return [rows.insertId];
+        return [rows.insertId]
       case 'del':
       case 'update':
       case 'counter':
-        return rows.affectedRows;
+        return rows.affectedRows
       default:
-        return response;
+        return response
     }
-  };
+  }
 
 }

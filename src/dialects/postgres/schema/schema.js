@@ -1,33 +1,21 @@
 
-
-function SchemaCompiler_PG() {
-  this.client = client;
-  this.Formatter = client.Formatter;
-  Schema.Compiler.apply(this, arguments);
-}
-inherits(SchemaCompiler_PG, Schema.Compiler);
-
 // Check whether the current table
-SchemaCompiler_PG.prototype.hasTable = function(tableName) {
-  this.pushQuery({
-    sql: 'select * from information_schema.tables where table_name = ?',
-    bindings: [tableName],
-    output: function(resp) {
-      return resp.rows.length > 0;
-    }
-  });
+hasTable(tableName) {
+  return sql([
+    select('*'),
+    from('information_schema.tables'),
+    where('table_name', tableName)
+  ], {test: true})
 };
 
 // Compile the query to determine if a column exists in a table.
-SchemaCompiler_PG.prototype.hasColumn = function(tableName, columnName) {
-  this.pushQuery({
-    sql: 'select * from information_schema.columns where table_name = ? and column_name = ?',
-    bindings: [tableName, columnName],
-    output: function(resp) {
-      return resp.rows.length > 0;
-    }
-  });
-};
+hasColumn(tableName, columnName) {
+  return sql([
+    select('*'), 
+    from('information_schema.columns'), 
+    where({table_name: tableName, column_name: columnName})
+  ], {test: true})
+}
 
 // Compile a rename table command.
 SchemaCompiler_PG.prototype.renameTable = function(from, to) {

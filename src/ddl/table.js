@@ -18,6 +18,11 @@ class Table {
 
 }
 
+// table('tableName', (tbl) => {
+//   tbl.string('account')
+//   tbl.index([])
+// })
+
 export function table(tableName, ...columns) {
 
 }

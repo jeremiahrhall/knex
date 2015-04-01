@@ -1,7 +1,7 @@
 
-var _            = require('lodash');
-var Client_MySQL = require('../mysql');
-var Promise      = require('../../promise');
+import assign       from 'lodash/object/assign'
+import Client_MySQL from '../mysql'
+import Promise      from '../../promise'
 
 try {
   var Mariasql = require('mariasql');  
@@ -14,7 +14,7 @@ try {
 // objects, which extend the base 'lib/query/builder' and
 // 'lib/query/compiler', respectively.
 export class Engine_MariaSQL extends Engine_MySQL {
-  
+
   get dialect() {
     return 'mariasql'
   }
@@ -22,17 +22,18 @@ export class Engine_MariaSQL extends Engine_MySQL {
   // Get a raw connection, called by the `pool` whenever a new
   // connection needs to be added to the pool.
   acquireRawConnection() {
-    var connection = new Mariasql();
-    connection.connect(_.extend({metadata: true}, this.connectionSettings));
-    return new Promise(function(resolver, rejecter) {
-      connection.on('connect', function() {
-        connection.removeAllListeners('end');
-        connection.removeAllListeners('error');
-        resolver(connection);
-      })
-      .on('error', rejecter);
-    });
-  };
+    var connection = new Mariasql()
+    connection.connect(assign({metadata: true}, this.connectionSettings))
+    return new Promise((resolver, rejecter) => {
+      connection
+        .on('connect', function() {
+          connection.removeAllListeners('end')
+          connection.removeAllListeners('error')
+          resolver(connection)
+        })
+        .on('error', rejecter)
+    })
+  }
 
   // Return the database for the MariaSQL client.
   database() {

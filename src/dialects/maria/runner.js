@@ -1,11 +1,10 @@
 // MariaSQL Runner
 // ------
 
-var _         = require('lodash');
-var SqlString = require('../mysql/string');
-
-var Promise  = require('../../promise');
-var Runner   = require('../../runner');
+var _          = require('lodash');
+var SqlString  = require('../mysql/string');
+var Promise    = require('../../promise');
+var Runner     = require('../../runner');
 var helpers    = require('../../helpers');
 
 // Inherit from the `Runner` constructor's prototype,
@@ -81,23 +80,23 @@ function parseType(value, type) {
   switch (type) {
     case 'DATETIME':
     case 'TIMESTAMP':
-      return new Date(value);
+      return new Date(value)
     case 'INTEGER':
-      return parseInt(value, 10);
+      return parseInt(value, 10)
     default:
-      return value;
+      return value
   }
 }
 
 function rowHandler(callback) {
   var types;
   return function(row, meta) {
-    if (!types) types = meta.types;
-    var keys = Object.keys(types);
+    if (!types) types = meta.types
+    var keys = Object.keys(types)
     for (var i = 0, l = keys.length; i < l; i++) {
       var type = keys[i];
-      row[type] = parseType(row[type], types[type]);
+      row[type] = parseType(row[type], types[type])
     }
-    callback(row);
+    callback(row)
   };
 }

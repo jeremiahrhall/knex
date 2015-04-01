@@ -1,28 +1,5 @@
 
-
-// Oracle Query Builder & Compiler
-// ------
-module.exports = function(client) {
-
-var _             = require('lodash');
-var inherits      = require('inherits');
-var QueryBuilder  = require('../../query/builder');
-var QueryCompiler = require('../../query/compiler');
-var helpers       = require('../../helpers');
-
 var ReturningHelper = require('./utils').ReturningHelper;
-
-// Query Compiler
-// -------
-
-// Set the "Formatter" to use for the queries,
-// ensuring that all parameterized values (even across sub-queries)
-// are properly built into the same query.
-function QueryCompiler_Oracle() {
-  this.formatter = new client.Formatter();
-  QueryCompiler.apply(this, arguments);
-}
-inherits(QueryCompiler_Oracle, QueryCompiler);
 
 // for single commands only
 QueryCompiler_Oracle.prototype._addReturningToSqlAndConvert = function (sql, returning, tableName) {
@@ -185,7 +162,7 @@ function surroundQueryWithLimitAndOffset(self, query, limit, offset) {
     return "select * from (" + query + ") where rownum <= " + self.formatter.parameter(limit);
   }
 
-  var endRow = +(offset) + (hasLimit ? limit : 10000000000000);
+  var endRow = +(offset) + (hasLimit ? limit : 10000000000000)
 
   return "select * from " +
          "(select row_.*, ROWNUM rownum_ from (" + query + ") row_ " +
@@ -210,23 +187,4 @@ QueryCompiler_Oracle.prototype.select = function() {
   });
   var query = _.compact(statements).join(' ');
   return surroundQueryWithLimitAndOffset(self, query, this.single.limit, this.single.offset);
-};
-
-QueryCompiler_Oracle.prototype.aggregate = function(stmt) {
-  var val = stmt.value;
-  var splitOn = val.toLowerCase().indexOf(' as ');
-  // Allows us to speciy an alias for the aggregate types.
-  if (splitOn !== -1) {
-    var col = val.slice(0, splitOn);
-    var alias = val.slice(splitOn + 4);
-    return stmt.method + '(' + this.formatter.wrap(col) + ') ' + this.formatter.wrap(alias);
-  }
-  return stmt.method + '(' + this.formatter.wrap(val) + ')';
-};
-
-// Set the QueryBuilder & QueryCompiler on the client object,
-// incase anyone wants to modify things to suit their own purposes.
-client.QueryBuilder  = QueryBuilder_Oracle;
-client.QueryCompiler = QueryCompiler_Oracle;
-
 };

@@ -1,9 +1,9 @@
 
 // "Base Engine"
 // ------
-import Promise from './promise'
-import _ from 'lodash'
+import _              from 'lodash'
 import {EventEmitter} from 'events'
+import Promise        from './promise'
 
 // The base engine provides the general structure
 // for a dialect specific engine object. The engine
@@ -15,6 +15,10 @@ class Engine extends EventEmitter {
     this.isDebugging     = false
     this.migrationConfig = _.clone(config && config.migrations)
     this.seedConfig      = _.clone(config && config.seeds)
+  }
+
+  get engine() {
+    return this.dialect
   }
 
   // Acquire a connection from the pool.

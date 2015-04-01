@@ -24,36 +24,36 @@ export default class SchemaBuilder extends EventEmitter {
     return sequence(this, ifNotExists(createTable(tableName), new CreateTableBuilder(fn)))
   }
 
-  createSchema(schemaName) {
-    return sequence(this, createSchema(schemaName), )
+  createSchema(schemaName, fn) {
+    return sequence(this, createSchema(schemaName), fn)
   }
 
-  createSchemaIfNotExists() {
-    return sequence(this, ifNotExists(createSchema(schemaName)), ))
+  createSchemaIfNotExists(schemaName, fn) {
+    return sequence(this, ifNotExists(createSchema(schemaName)), fn)
   }
 
-  createExtension() {
-    return sequence(this, createExtension(schemaName), )
+  createExtension(extensionName, fn) {
+    return sequence(this, createExtension(extensionName), fn)
   }
 
-  createExtensionIfNotExists() {
-    return sequence(this, ifNotExists(createExtension(schemaName), ))
+  createExtensionIfNotExists(extensionName, fn) {
+    return sequence(this, ifNotExists(createExtension(extensionName), fn))
   }
 
-  dropExtension() {
-    return sequence(this, dropExtension(schemaName), )
+  dropExtension(schemaName) {
+    return sequence(this, dropExtension(schemaName))
   }
   
-  dropExtensionIfExists() {
-    return sequence(this, ifExists(dropExtension(schemaName), ))
+  dropExtensionIfExists(extensionName) {
+    return sequence(this, ifExists(dropExtension(extensionName)))
   }
 
-  dropSchema() {
-    return sequence(this, dropSchema(schemaName), )
+  dropSchema(schemaName) {
+    return sequence(this, dropSchema(schemaName))
   }
 
-  dropSchemaIfExists() {
-    return sequence(this, ifExists(dropSchema(schemaName), ))
+  dropSchemaIfExists(schemaName) {
+    return sequence(this, ifExists(dropSchema(schemaName)))
   }
 
   table() {
@@ -65,12 +65,12 @@ export default class SchemaBuilder extends EventEmitter {
     return sequence(this, ifExists(dropSchema(schemaName), new AlterTableBuilder()))
   }
 
-  dropTable() {
-    return sequence(this, ifExists(dropSchema(schemaName), ))
+  dropTable(tableName) {
+    return sequence(this, dropSchema(tableName))
   }
 
-  dropTableIfExists() {
-    return sequence(this, ifExists(dropSchema(schemaName), ))
+  dropTableIfExists(tableName) {
+    return sequence(this, ifExists(dropSchema(tableName)))
   }
 
   raw() {
@@ -81,12 +81,12 @@ export default class SchemaBuilder extends EventEmitter {
     return sequence(this, hasTable(schemaName))
   }
 
-  hasColumn() {
-    return sequence(this, ifExists(dropSchema(schemaName), ))
+  hasColumn(columnName) {
+    
   }
 
   debug() {
-    return sequence(this, ifExists(dropSchema(schemaName), ))
+    
   }
 
 }

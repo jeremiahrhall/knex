@@ -1,20 +1,22 @@
 // JoinBuilder
 // -------
 
-// The "JoinBuilder" is a chainable builder for the join clause
-class JoinBuilder {
+// The "JoinBuilder" is a chainable builder for just the join clause
+export default class JoinBuilder {
   
   constructor(table, type) {
+    this.clauses  = []
     this.elements = {}
-    this.table    = table;
-    this.joinType = type;
-    this.clauses  = [];
-    this.and      = this;
+    this.table    = table
+    this.joinType = type
     this.grouping = 'join'
   }
 
   // Adds an "on" clause to the current join object.
   on(first, operator, second) {
+    if (typeof first === 'function') {
+      return new JoinBuilder()
+    }
     switch (arguments.length) {
       case 1:  data = ['on', this._bool(), first]; break;
       case 2:  data = ['on', this._bool(), first, '=', operator]; break;
@@ -31,11 +33,12 @@ class JoinBuilder {
 
   // Adds an "and on" clause to the current join object.
   andOn() {
-    return this.on.apply(this, arguments);
+    return this.on(...arguments);
   }
 
   // Adds an "or on" clause to the current join object.
   orOn(first, operator, second) {
+    return or(on(...arguments))
     /*jshint unused: false*/
     return this._bool('or').on.apply(this, arguments);
   }
@@ -59,9 +62,7 @@ class JoinBuilder {
 }
 
 Object.defineProperty(JoinBuilder.prototype, 'or', {
-  get: function () {
+  get() {
     return this._bool('or');
   }
 });
-
-module.exports = JoinBuilder;

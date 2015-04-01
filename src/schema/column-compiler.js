@@ -3,7 +3,7 @@
 // Used for designating column definitions
 // during the table "create" / "alter" statements.
 // -------
-var _ = require('lodash');
+var _   = require('lodash');
 var Raw = require('../raw');
 
 function ColumnCompiler(tableCompiler, columnBuilder) {

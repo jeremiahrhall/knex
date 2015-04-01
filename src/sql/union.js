@@ -53,8 +53,6 @@ function unionAll(callbacks) {
     return this
 
 
-
-
   // Compile the "union" queries attached to the main query.
   union() {
     this.

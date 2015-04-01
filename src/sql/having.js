@@ -13,71 +13,22 @@ class Having extends Clause {
 
 function having(...args) {
   switch(args.length) {
-    
+    case 1: 
+      if (isArray(args[0])) return having(...args[0])
+      return havingArity1(args[0])
+    case 2: return havingArity2(args[0], args[1])
+    case 3: return havingArity2(args[0], args[1], args[2])
   }
 }
 
 function havingArity1() {
-
+  return new Having()
 }
 
 function havingArity2() {
-
+  return new Having()
 }
 
 function havingArity3() {
-  
+  return new Having() 
 }
-
-  arguments.slice(0, 1)
-
-
-  if (isClause(value)) {
-    return new Having(value)
-  }
-}
-
-
-
-    this._statements.push({
-      grouping: 'having',
-      type: 'whereWrapped',
-      value: callback,
-      bool: this._bool()
-    });
-    return this
-
-
-    if (column instanceof Raw && arguments.length === 1) {
-      return this._havingRaw(column);
-    }
-    
-    // Check if the column is a function, in which case it's
-    // a having statement wrapped in parens.
-    if (_.isFunction(column)) {
-      return this.havingWrapped(column);
-    }
-    
-    this._statements.push({
-      grouping: 'having',
-      type: 'havingBasic',
-      column: column,
-      operator: operator,
-      value: value,
-      bool: this._bool()
-    });
-    return this
-
-  // Adds a raw `having` clause to the query.
-  _havingRaw(sql, bindings) {
-    var raw = (sql instanceof Raw ? sql : new Raw(sql, bindings));
-    this._statements.push({
-      grouping: 'having',
-      type: 'havingRaw',
-      value: raw,
-      bool: this._bool()
-    });
-    return this
-  }
-
-    

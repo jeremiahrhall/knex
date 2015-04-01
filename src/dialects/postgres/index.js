@@ -1,5 +1,4 @@
 
-
 // PostgreSQL
 // -------
 var _        = require('lodash');
@@ -8,20 +7,32 @@ var inherits = require('inherits');
 var Client  = require('../../client');
 var Promise = require('../../promise');
 
-var pg;
-var utils;
+var pg = (function() {
+  try {
+    return require('pg');
+  } catch (e) {
+    return require('pg.js');
+  }
+})();
+
+var utils = require('./utils');
 
 // Always initialize with the "QueryBuilder" and "QueryCompiler"
 // objects, which extend the base 'lib/query/builder' and
 // 'lib/query/compiler', respectively.
 export class Engine_PG extends Engine {
-  
+
   constructor(config) {
     super(config)
     if (config.returning) this.defaultReturning = config.returning;
     if (config.debug) this.isDebugging = true;
     this.connectionSettings = config.connection;
-    this.pool = new this.Pool(config.pool);
+    this.pool = new Pool(assign({
+      release(client, callback) { 
+        client.end()
+        callback()
+      }
+    }, config.pool))
   }
 
   get pool() {
@@ -35,21 +46,13 @@ export class Engine_PG extends Engine {
   // Lazy load the pg dependency, since we might just be using
   // the client to generate SQL strings.
   initDriver() {
-    pg = pg || (function() {
-      try {
-        return require('pg');
-      } catch (e) {
-        return require('pg.js');
-      }
-    })();
+
   }
 
   // Prep the bindings as needed by PostgreSQL.
   prepBindings(bindings, tz) {
-    /*jshint unused: false*/
-    utils = utils || require('./utils');
     return _.map(bindings, utils.prepareValue);
-  };
+  }
 
   endConnection(client, connection) {
     if (!connection || connection.__knex__disposed) return;

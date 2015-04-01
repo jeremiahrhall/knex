@@ -1,5 +1,3 @@
-
-
 function dateToString(date) {
   function pad(number, digits) {
     number = number.toString();

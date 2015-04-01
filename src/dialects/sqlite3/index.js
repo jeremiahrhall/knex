@@ -6,8 +6,13 @@ class Engine_SQLite3 extends Engine {
     super(config)
     if (config.debug) this.isDebugging = true
     this.connectionSettings = config.connection
-    this.initPool()
-    this.pool = new this.Pool(config.pool)
+    this.pool = new Pool(assign({
+      max: 1,
+      min: 1,
+      release(client, callback) {
+        client.close(callback)
+      }
+    }, config.pool))
   }
 
   get dialect() {

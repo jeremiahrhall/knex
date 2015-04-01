@@ -6,7 +6,7 @@ Migrator_Oracle.prototype._createMigrationTable = function(tableName) {
     t.string('name');
     t.integer('batch');
   });
-};
+}
 
 // Lists all migrations that have been completed for the current db, as an array.
 Migrator_Oracle.prototype._listCompleted = Promise.method(function() {
@@ -19,7 +19,7 @@ Migrator_Oracle.prototype._listCompleted = Promise.method(function() {
     .then(function(migrations) {
       return _.pluck(migrations, 'name');
     });
-});
+})
 
 // Get the last batch of migrations, by name, ordered by insert migration_time
 // in reverse order.
@@ -30,4 +30,4 @@ Migrator_Oracle.prototype._getLastBatch = function() {
       this.select().max('batch').from(tableName);
     })
     .orderBy('migration_time', 'desc');
-};
+}

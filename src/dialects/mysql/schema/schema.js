@@ -8,7 +8,7 @@ SchemaCompiler_MySQL.prototype.renameTable = function(tableName, to) {
 SchemaCompiler_MySQL.prototype.hasTable = function(tableName) {
   this.pushQuery({
     sql: 'show tables like ' + this.formatter.parameter(tableName),
-    output: function(resp) {
+    output(resp) {
       return resp.length > 0;
     }
   });
@@ -19,7 +19,7 @@ SchemaCompiler_MySQL.prototype.hasColumn = function(tableName, column) {
   this.pushQuery({
     sql: 'show columns from ' + this.formatter.wrap(tableName) +
       ' like ' + this.formatter.parameter(column),
-    output: function(resp) {
+    output(resp) {
       return resp.length > 0;
     }
   });

@@ -237,10 +237,10 @@ export class BaseRunner {
   }
 
   beginTransaction() {
-    return this._beginTransaction   && this.query({sql: this._beginTransaction})
+    return this._beginTransaction && this.query({sql: this._beginTransaction})
   }
   commitTransaction() {
-    return this._commitTransaction   && this.query({sql: this._commitTransaction})
+    return this._commitTransaction && this.query({sql: this._commitTransaction})
   }
   rollbackTransaction() {
     return this._rollbackTransaction && this.query({sql: this._rollbackTransaction})

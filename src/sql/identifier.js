@@ -1,6 +1,0 @@
-
-function identifier(value) {
-
-  
-
-}

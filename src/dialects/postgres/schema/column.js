@@ -1,5 +1,5 @@
 
-  this.modifiers = ['nullable', 'defaultTo', 'comment'];
+this.modifiers = ['nullable', 'defaultTo', 'comment'];
 
 // Types
 // ------
@@ -39,9 +39,4 @@ comment = function(comment) {
     this.pushQuery('comment on column ' + this.tableCompiler.tableName() + '.' +
       this.formatter.wrap(this.args[0]) + " is " + (comment ? "'" + comment + "'" : 'NULL'));
   }, comment);
-};
-
-client.ColumnBuilder = ColumnBuilder_PG;
-client.ColumnCompiler = ColumnCompiler_PG;
-
 };

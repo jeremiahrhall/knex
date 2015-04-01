@@ -121,8 +121,3 @@ checkIn = function (value) {
   }
   return 'check (' + this.formatter.wrap(this.args[0]) + ' in (' + value + '))';
 };
-
-client.ColumnBuilder = ColumnBuilder_Oracle;
-client.ColumnCompiler = ColumnCompiler_Oracle;
-
-};

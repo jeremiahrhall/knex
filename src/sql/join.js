@@ -1,17 +1,19 @@
 import Clause from './clause'
-import extractAlias from '../'
+import {JOIN} from './keywords'
 
 class Join extends Clause {
 
-  constructor(joinType, value, column) {
-    this.joinType = joinType
-    this.column   = column
-    this.value    = value
-    this.type     = 'join'
+  constructor(joinType, a) {
+    this.joinType  = joinType
+    this.column    = column
+    this.value     = value
+    this.grouping  = 'joins'
+    this.type      = 'JoinClause'
   }
 
   build(compile) {
-    return `${this.joinType} JOIN ${compile(this.column)} ${compile(this.value)}`
+    let {joinType, column, value}
+    return [joinType, kwd.JOIN, column, value]
   }
 
 }
@@ -42,10 +44,23 @@ var sql = _.reduce(joins, function(acc, join) {
 }, [], this);
 return sql.length > 0 ? sql.join(' ') : '';
 
+function joinArity1(join) {
+  if (isClause(join)) {
+    
+  }
+  if (isString(join)) {
+    
+  }
+  if (isFucntion(join)) {
+    
+  }
+}
 
-function join(joinType, args) {
+export function join(joinType, args) {
   switch(args.length) {
-    case 
+    case 1: return joinArity1(joinType, args[0])
+    case 2: return joinArity2(joinType, args[0], args[1])
+    case 2: return joinArity3(joinType, args[0], args[1])
   }
 
   if (_.isFunction(first)) {
@@ -63,38 +78,38 @@ function join(joinType, args) {
   return this
 }
 
-function innerJoin(args) {
-  return join('INNER', args)
+export function innerJoin(args) {
+  return join(kwd.INNER, args)
 }
 
-function leftJoin(args) {
-  return join('LEFT', args)
+export function leftJoin(args) {
+  return join(kwd.LEFT, args)
 }
 
-function leftOuterJoin(args) {
-  return join('LEFT OUTER', args)
+export function leftOuterJoin(args) {
+  return join(kwd.LEFT_OUTER, args)
 }
 
-function rightJoin(args) {
-  return join('RIGHT', args)
+export function rightJoin(args) {
+  return join(kwd.RIGHT, args)
 }
 
-function rightOuterJoin(args) {
-  return join('RIGHT OUTER', args)
+export function rightOuterJoin(args) {
+  return join(kwd.RIGHT_OUTER, args)
 }
 
-function outerJoin(args) {
-  return join('OUTER', args)
+export function outerJoin(args) {
+  return join(kwd.OUTER, args)
 }
 
-function fullOuterJoin(args) {
-  return join('FULL OUTER', args)
+export function fullOuterJoin(args) {
+  return join(kwd.FULL_OUTER, args)
 }
 
-function crossJoin(args) {
-  return join('CROSS', args)
+export function crossJoin(args) {
+  return join(kwd.CROSS, args)
 }
 
-function joinRaw(sql, bindings) {
+export function joinRaw(sql, bindings) {
   return new Join(raw(sql, bindings))
 }

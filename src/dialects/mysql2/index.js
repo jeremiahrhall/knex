@@ -1,9 +1,8 @@
-
 // MySQL2 Client
 // -------
 
-import mysql2       from 'mysql2'
 import Promise      from 'bluebird'
+import mysql2       from 'mysql2'
 import Engine_MySQL from '../mysql'
 import pick         from 'lodash/object/pick'
 

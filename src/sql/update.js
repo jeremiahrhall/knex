@@ -27,8 +27,7 @@ class SetValues {
 export function update(tableName) {
   return new UpdateClause(tableName)
 }
-
-// 
+ 
 export function set(values) {
 
 }

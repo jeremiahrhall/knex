@@ -1,9 +1,12 @@
 // Raw
 // -------
-import _ from 'lodash'
+import _              from 'lodash'
+import {raw, wrap}    from './sql'
 import {EventEmitter} from 'events'
+import knexInterface  from './interface'
+import {mixin}        from './helpers'
 
-class Raw extends EventEmitter {
+export default class Raw extends EventEmitter {
   
   constructor(engine) {
     this.engine = engine
@@ -21,23 +24,6 @@ class Raw extends EventEmitter {
     return this
   }
 
-  // Calls `toString` on the Knex object.
-  toString() {
-    return this.toQuery()
-  }
-
-  // Returns the raw sql for the query.
-  toSQL() {
-    return {
-      sql: this.sql,
-      bindings: this.bindings
-    }
-  }
-
 }
 
-// Allow the `Raw` object to be utilized with full access to the relevant
-// promise API.
-require('./interface')(Raw);
-
-module.exports = Raw;
+mixin(Raw, knexInterface)

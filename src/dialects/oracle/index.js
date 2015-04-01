@@ -5,19 +5,28 @@ import _        from  'lodash'
 import Engine   from  '../base'
 import Promise  from  '../../promise'
 import {ReturningHelper} from './utils'
+import Pool     from '../../pool'
 
 // Always initialize with the "QueryBuilder" and "QueryCompiler"
 // objects, which extend the base 'lib/query/builder' and
 // 'lib/query/compiler', respectively.
 export default class Engine_Oracle extends Engine {
 
+  static wrapIdentifier(value) {
+    return (value !== '*' ? '"' + value.replace(/"/g, '""') + '"' : '*');
+  }
+
   constructor(config) {
     super(config)
-    this.driver = require('oracle')
     if (config.debug) this.isDebugging = true
     this.connectionSettings = _.clone(config.connection)
-    this.initPool()
-    this.pool = new this.Pool(config.pool)
+    this.driver = require('oracle')
+    this.pool   = new Pool(assign({
+      release(client, callback) { 
+        client.close()
+        callback()
+      }
+    }, config.pool))
   }
 
   get dialect() {

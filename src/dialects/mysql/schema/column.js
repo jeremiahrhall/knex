@@ -16,8 +16,8 @@ integer = function(length) {
   return 'int' + length;
 };
 mediumint = 'mediumint';
-smallint = 'smallint';
-tinyint = function(length) {
+smallint  = 'smallint';
+tinyint   = function(length) {
   length = length ? '(' + this._num(length, 1) + ')' : '';
   return 'tinyint' + length;
 };
